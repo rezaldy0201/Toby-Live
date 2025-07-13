@@ -1,7 +1,3 @@
-
-const apiUrl = "https://api.deepseek.com/openai/v1/chat/completions";
-const apiKey = "DEEPSEEK-API-KEY-HERE"; // Ganti dengan API key kamu jika punya
-
 async function sendMessage() {
   const inputField = document.getElementById("userInput");
   const userText = inputField.value.trim();
@@ -12,24 +8,19 @@ async function sendMessage() {
 
   appendMessage("Toby", "Mengetik...");
 
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages: [{ role: "user", content: userText }],
-      temperature: 0.7,
-    }),
-  });
-
-  const data = await response.json();
-  const reply = data.choices?.[0]?.message?.content || "Maaf, Toby tidak bisa menjawab saat ini.";
-
-  removeLastMessage(); // Hapus 'Mengetik...'
-  appendMessage("Toby", reply);
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userText })
+    });
+    const data = await response.json();
+    removeLastMessage();
+    appendMessage("Toby", data.reply);
+  } catch (error) {
+    removeLastMessage();
+    appendMessage("Toby", "Maaf Ayah, sepertinya ada masalah teknis. Coba lagi nanti ya 🙏");
+  }
 }
 
 function appendMessage(sender, message) {
@@ -43,5 +34,5 @@ function appendMessage(sender, message) {
 
 function removeLastMessage() {
   const chatlog = document.getElementById("chatlog");
-  chatlog.removeChild(chatlog.lastChild);
+  if (chatlog.lastChild) chatlog.removeChild(chatlog.lastChild);
 }
